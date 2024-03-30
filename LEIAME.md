@@ -11,6 +11,13 @@ Os passos da implementação do projeto:
 
 ![Image-01-IntelliJ](images/Img-01-IntelliJ.png)
 
+2. Criar a classe `RoutesController`:
+- com a anotação `@RestController`;
+- com a rota `/login` do tipo POST;
+- com as rotas `/, /users, /admins, /accessDenied` do tipo GET.
+
+![Image-02-RoutesController](images/Img-02-UML-Class-RoutesController.png)
+
 
 ## Referências
 https://docs.spring.io/spring-security/reference/servlet/authentication/passwords/index.html
