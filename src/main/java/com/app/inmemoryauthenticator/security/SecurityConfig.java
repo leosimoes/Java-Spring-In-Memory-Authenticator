@@ -29,10 +29,9 @@ public class SecurityConfig {
                         .requestMatchers("/").permitAll()
                         .requestMatchers("/users").hasAnyRole("USER", "ADMIN")
                         .requestMatchers("/admins").hasRole("ADMIN")
-                        .anyRequest().authenticated()
-                ).exceptionHandling(
-                        ex -> ex.accessDeniedPage("/accessDenied")
-                ).httpBasic(Customizer.withDefaults())
+                        .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex.accessDeniedPage("/accessDenied"))
+                .httpBasic(Customizer.withDefaults())
                 .formLogin(AbstractHttpConfigurer::disable)
                 .logout(AbstractHttpConfigurer::disable)
                 .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
