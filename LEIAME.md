@@ -42,6 +42,95 @@ Os passos da implementação do projeto:
 
 ![Image-03-SecurityConfig](images/Img-03-UML-Class-SecurityConfig.png)
 
+## Código
+
+```java
+@RestController
+public class RoutesController {
+
+    @GetMapping("/")
+    public String home(){
+        return "Home Page - Allowed for everyone";
+    }
+
+    @GetMapping("/users")
+    public String users(){
+        return "Users Page - Allowed for logged-in users and administrators";
+    }
+
+    @GetMapping("/admins")
+    public String admins(){
+        return "Admins Page - Allowed for logged-in admins";
+    }
+
+    @GetMapping("/accessDenied")
+    public String accessDenied(){
+        return "Access denied Page";
+    }
+
+}
+```
+
+
+```java
+@Configuration
+@EnableWebSecurity
+public class SecurityConfig {
+
+    @Bean
+    public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception {
+        http
+                .authorizeHttpRequests((authorize) -> authorize
+                        .requestMatchers("/").permitAll()
+                        .requestMatchers("/users").hasAnyRole("USER", "ADMIN")
+                        .requestMatchers("/admins").hasRole("ADMIN")
+                        .anyRequest().authenticated())
+                .exceptionHandling(ex -> ex.accessDeniedPage("/accessDenied"))
+                .httpBasic(Customizer.withDefaults())
+                .formLogin(AbstractHttpConfigurer::disable)
+                .logout(AbstractHttpConfigurer::disable)
+                .sessionManagement(session -> session.sessionCreationPolicy(SessionCreationPolicy.STATELESS)
+                );
+
+        return http.build();
+    }
+
+    @Bean
+    public UserDetailsService userDetailsService() {
+        UserDetails user = User
+                .withDefaultPasswordEncoder()
+                .username("usuario")
+                .password("senha")
+                .roles("USER")
+                .build();
+
+        UserDetails admin = User
+                .withDefaultPasswordEncoder()
+                .username("administrador")
+                .password("codigo")
+                .roles("ADMIN")
+                .build();
+
+        return new InMemoryUserDetailsManager(user, admin);
+    }
+
+    @Bean
+    public PasswordEncoder passwordEncoder() {
+        return PasswordEncoderFactories.createDelegatingPasswordEncoder();
+    }
+
+    @Bean
+    public AuthenticationManager authenticationManager(UserDetailsService UserDetailsService,
+                                                       PasswordEncoder passwordEncoder) {
+        DaoAuthenticationProvider daoAuthenticationProvider = new DaoAuthenticationProvider();
+        daoAuthenticationProvider.setUserDetailsService(UserDetailsService);
+        daoAuthenticationProvider.setPasswordEncoder(passwordEncoder);
+
+        return new ProviderManager(daoAuthenticationProvider);
+    }
+}
+```
+
 
 ## Referências
 https://docs.spring.io/spring-security/reference/servlet/authentication/passwords/index.html
